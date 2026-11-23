@@ -19,6 +19,8 @@ public class WorkoutWidget extends AppWidgetProvider {
  static final String[] titles={"Плечи · Грудь · Ноги","Спина · Руки","Всё тело"};
  static final String[][] names={{"Махи гантелями","Жим гантелей на полу","Приседания с гантелью"},{"Тяга гантели в наклоне","Молотковые сгибания","Разгибание из-за головы"},{"Тяга штанги в наклоне","Махи гантелями","Румынская тяга"}};
  static final String[][] reps={{"2 × 12–15","2 × 8–12","2 × 10–12"},{"2 × 10–12","2 × 10–12","2 × 10–12"},{"2 × 10–12","2 × 12–15","2 × 10–12"}};
+ static final String[][] symbols={{"↗","▰","▾"},{"↙","💪","↑"},{"↙","↗","▾"}};
+ static final int[] iconIds={R.id.icon1,R.id.icon2,R.id.icon3};
  static final int[] nameIds={R.id.name1,R.id.name2,R.id.name3};
  static final int[] repIds={R.id.reps1,R.id.reps2,R.id.reps3};
  static final int[] weightIds={R.id.weight1,R.id.weight2,R.id.weight3};
@@ -67,17 +69,18 @@ public class WorkoutWidget extends AppWidgetProvider {
    v.setTextViewText(R.id.progress,"Выполнено "+checked+" из 3");
    for(int j=0;j<3;j++){
     v.setTextViewText(nameIds[j],names[idx][j]);
+    v.setTextViewText(iconIds[j],symbols[idx][j]);
     v.setTextViewText(repIds[j],reps[idx][j]);
     float weight=p.getFloat("weight_"+idx+"_"+j,0);
     v.setTextViewText(weightIds[j],((weight==(int)weight)?Integer.toString((int)weight):Float.toString(weight))+" кг");
     boolean done=p.getBoolean("check_"+date+"_"+j,false);
-    v.setTextViewText(checkIds[j],done?"✓":"○");
+    v.setTextViewText(checkIds[j],done?"✓ Готово":"○ Отметить");
     v.setTextColor(checkIds[j],done?Color.rgb(142,229,174):Color.rgb(127,157,145));
     v.setOnClickPendingIntent(checkIds[j],action(c,id,ACTION_TOGGLE,date,j,0));
     v.setOnClickPendingIntent(plusIds[j],action(c,id,ACTION_WEIGHT,date,j,1));
     v.setOnClickPendingIntent(minusIds[j],action(c,id,ACTION_WEIGHT,date,j,-1));
    }
-   v.setTextViewText(R.id.complete,checked==3?"Завершить →":"Отметь все 3");
+   v.setTextViewText(R.id.complete,checked==3?"Завершить →":"Отметь упражнения");
    v.setOnClickPendingIntent(R.id.complete,action(c,id,ACTION_DONE,date,0,0));
    m.updateAppWidget(id,v);
   }
