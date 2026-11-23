@@ -1,13 +1,15 @@
 plugins { id 'com.android.application' }
 android {
- namespace 'com.example.workoutwidget'
- compileSdk 35
- defaultConfig {
-  applicationId 'com.example.workoutwidget'
-  minSdk 26
-  targetSdk 35
-  versionCode (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
-  versionName "1.0.${versionCode}"
- }
- buildFeatures { buildConfig true }
+    namespace 'com.example.workoutwidget'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.example.workoutwidget'
+        minSdk 26
+        targetSdk 35
+        versionCode = Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
+        versionName = "1.0." + versionCode
+    }
+    buildFeatures {
+        buildConfig = true
+    }
 }
