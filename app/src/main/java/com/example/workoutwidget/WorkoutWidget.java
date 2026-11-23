@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.widget.RemoteViews;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
+import java.time.temporal.ChronoUnit;
 
 public class WorkoutWidget extends AppWidgetProvider {
  static final String ACTION_DONE="com.example.workoutwidget.ACTION_DONE";
@@ -21,6 +22,7 @@ public class WorkoutWidget extends AppWidgetProvider {
  static final String[][] reps={{"2 × 12–15","2 × 8–12","2 × 10–12"},{"2 × 10–12","2 × 10–12","2 × 10–12"},{"2 × 10–12","2 × 12–15","2 × 10–12"}};
  static final String[][] symbols={{"↗","▰","▾"},{"↙","💪","↑"},{"↙","↗","▾"}};
  static final int[] iconIds={R.id.icon1,R.id.icon2,R.id.icon3};
+ static final String[][] exerciseKeys={{"lateral_raise","floor_press","goblet_squat"},{"one_arm_row","hammer_curl","overhead_extension"},{"barbell_row","lateral_raise","romanian_deadlift"}};
  static final int[] nameIds={R.id.name1,R.id.name2,R.id.name3};
  static final int[] repIds={R.id.reps1,R.id.reps2,R.id.reps3};
  static final int[] weightIds={R.id.weight1,R.id.weight2,R.id.weight3};
@@ -54,24 +56,29 @@ public class WorkoutWidget extends AppWidgetProvider {
    if(all) p.edit().putBoolean("done_"+date,true).apply();
   }
   if(ACTION_TOGGLE.equals(a)){if(!date.equals(nextDate(c).toString()))return;String key="check_"+date+"_"+e;p.edit().putBoolean(key,!p.getBoolean(key,false)).apply();}
-  if(ACTION_WEIGHT.equals(a)){if(!date.equals(nextDate(c).toString()))return;int day=index(LocalDate.parse(date));String key="weight_"+day+"_"+e;float current=p.getFloat(key,0);float value=Math.max(0,current+intent.getIntExtra("delta",0));p.edit().putFloat(key,value).apply();}
+  if(ACTION_WEIGHT.equals(a)){if(!date.equals(nextDate(c).toString()))return;int day=index(LocalDate.parse(date));String key="weight_ex_"+exerciseKeys[day][e];float current=p.getFloat(key,p.getFloat("weight_"+day+"_"+e,0));float value=Math.max(0,current+intent.getIntExtra("delta",0));p.edit().putFloat(key,value).apply();}
   refresh(c);
  }
  @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){
   LocalDate d=nextDate(c);String date=d.toString();int idx=index(d);SharedPreferences p=c.getSharedPreferences("workout",0);
+  String startText=p.getString("program_start_date",null);
+  if(startText==null){startText=LocalDate.now().toString();p.edit().putString("program_start_date",startText).apply();}
+  LocalDate start;
+  try{start=LocalDate.parse(startText);}catch(Exception ignored){start=LocalDate.now();}
+  int sets=ChronoUnit.DAYS.between(start,d)>=14?3:2;
   int checked=0;for(int j=0;j<3;j++)if(p.getBoolean("check_"+date+"_"+j,false))checked++;
   for(int id:ids){
    RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.widget);
    v.setTextViewText(R.id.day,"БЛИЖАЙШАЯ · "+date);
    v.setTextViewText(R.id.title,titles[idx]);
    v.setTextViewText(R.id.count,checked+"/3");
-   v.setTextViewText(R.id.subtitle,"3 упражнения · 2 подхода · отдых 60–90 сек");
+   v.setTextViewText(R.id.subtitle,"3 упражнения · "+sets+" подхода · отдых 60–90 сек");
    v.setTextViewText(R.id.progress,"Выполнено "+checked+" из 3");
    for(int j=0;j<3;j++){
     v.setTextViewText(nameIds[j],names[idx][j]);
     v.setTextViewText(iconIds[j],symbols[idx][j]);
-    v.setTextViewText(repIds[j],reps[idx][j]);
-    float weight=p.getFloat("weight_"+idx+"_"+j,0);
+    v.setTextViewText(repIds[j],sets+" × "+reps[idx][j].substring(reps[idx][j].indexOf("×")+1).trim());
+    float weight=p.getFloat("weight_ex_"+exerciseKeys[idx][j],p.getFloat("weight_"+idx+"_"+j,0));
     v.setTextViewText(weightIds[j],((weight==(int)weight)?Integer.toString((int)weight):Float.toString(weight))+" кг");
     boolean done=p.getBoolean("check_"+date+"_"+j,false);
     v.setTextViewText(checkIds[j],done?"✓ Готово":"○ Отметить");
