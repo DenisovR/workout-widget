@@ -10,7 +10,7 @@
   <TextView android:id="@+id/count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:background="@drawable/pill" android:textColor="#C3F9D4" android:textSize="13sp" android:textStyle="bold" android:paddingLeft="12dp" android:paddingRight="12dp" android:paddingTop="7dp" android:paddingBottom="7dp"/>
  </LinearLayout>
  <TextView android:id="@+id/subtitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="#9DAEB0" android:textSize="12sp"/>
- <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" android:layout_marginTop="10dp">
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="10dp">
   <include layout="@layout/exercise_one"/>
   <include layout="@layout/exercise_two"/>
   <include layout="@layout/exercise_three"/>
