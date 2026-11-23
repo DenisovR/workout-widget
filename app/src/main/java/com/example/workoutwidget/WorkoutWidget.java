@@ -77,7 +77,8 @@ public class WorkoutWidget extends AppWidgetProvider {
     v.setOnClickPendingIntent(plusIds[j],action(c,id,ACTION_WEIGHT,date,j,1));
     v.setOnClickPendingIntent(minusIds[j],action(c,id,ACTION_WEIGHT,date,j,-1));
    }
-   v.setTextViewText(R.id.complete,checked==3?"Завершить →":"Отметь все 3");\n   v.setOnClickPendingIntent(R.id.complete,action(c,id,ACTION_DONE,date,0,0));
+   v.setTextViewText(R.id.complete,checked==3?"Завершить →":"Отметь все 3");
+   v.setOnClickPendingIntent(R.id.complete,action(c,id,ACTION_DONE,date,0,0));
    m.updateAppWidget(id,v);
   }
  }
