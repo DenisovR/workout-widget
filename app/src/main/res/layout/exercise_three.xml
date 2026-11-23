@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
- android:layout_marginBottom="7dp" android:background="@drawable/exercise_card" android:padding="9dp" android:gravity="center_vertical" android:orientation="horizontal">
+ android:layout_width="match_parent" android:layout_height="wrap_content"
+ android:layout_marginBottom="7dp" android:background="@drawable/exercise_card" android:padding="12dp" android:gravity="center_vertical" android:orientation="horizontal">
  <TextView android:id="@+id/icon3" android:layout_width="42dp" android:layout_height="42dp" android:background="@drawable/icon_back" android:gravity="center" android:textSize="24sp" android:text="🏋"/>
  <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="9dp" android:orientation="vertical">
   <TextView android:id="@+id/name3" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" android:maxLines="2" android:ellipsize="end"/>
@@ -12,5 +12,5 @@
    <TextView android:id="@+id/plus3" android:layout_width="26dp" android:layout_height="26dp" android:gravity="center" android:background="@drawable/small_button" android:text="+" android:textColor="#D6F8DF" android:textSize="18sp"/>
   </LinearLayout>
  </LinearLayout>
- <TextView android:id="@+id/check3" android:layout_width="36dp" android:layout_height="46dp" android:gravity="center" android:text="○" android:textColor="#7F9D91" android:textSize="29sp"/>
+ <TextView android:id="@+id/check3" android:layout_width="86dp" android:layout_height="48dp" android:gravity="center" android:text="Отметить" android:textColor="#A8DDBA" android:textSize="12sp" android:textStyle="bold" android:contentDescription="Отметить выполнение упражнения"/>
 </LinearLayout>
