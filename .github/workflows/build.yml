@@ -46,20 +46,20 @@ jobs:
           name: workout-widget-test-apk
           path: app/build/outputs/apk/debug/app-debug.apk
       - name: Restore private signing key
-        if: env.SIGNING_READY == 'true'
+        if: env.SIGNING_READY == 'true' && hashFiles('assets/workout-exercises.jpg') != ''
         env:
           KEY_B64: ${{ secrets.WORKOUT_KEYSTORE_BASE64 }}
         run: |
           printf '%s' "$KEY_B64" | base64 --decode > "$RUNNER_TEMP/workout-release.p12"
           chmod 600 "$RUNNER_TEMP/workout-release.p12"
       - name: Build signed update APK
-        if: env.SIGNING_READY == 'true'
+        if: env.SIGNING_READY == 'true' && hashFiles('assets/workout-exercises.jpg') != ''
         env:
           SIGNING_KEYSTORE_PATH: ${{ runner.temp }}/workout-release.p12
           SIGNING_PASSWORD: ${{ secrets.WORKOUT_SIGNING_PASSWORD }}
         run: gradle :app:assembleRelease --no-daemon
       - name: Publish signed APK update
-        if: env.SIGNING_READY == 'true'
+        if: env.SIGNING_READY == 'true' && hashFiles('assets/workout-exercises.jpg') != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
