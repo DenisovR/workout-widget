@@ -9,9 +9,23 @@ android {
         versionCode = Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
         versionName = "1.0." + versionCode
     }
-    buildFeatures {
-        buildConfig = true
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('SIGNING_KEYSTORE_PATH') ?: 'release-signing.p12')
+            storePassword System.getenv('SIGNING_PASSWORD') ?: ''
+            keyAlias 'workout'
+            keyPassword System.getenv('SIGNING_PASSWORD') ?: ''
+            storeType 'pkcs12'
+        }
     }
+    buildTypes {
+        release {
+            if (System.getenv('SIGNING_KEYSTORE_PATH')) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled false
+        }
+    }
+    buildFeatures { buildConfig true }
 }
-
 dependencies { implementation 'androidx.core:core:1.15.0' }
