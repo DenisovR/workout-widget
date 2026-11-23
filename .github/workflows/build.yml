@@ -19,6 +19,26 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Prepare anatomical exercise images
+        if: ${{ hashFiles('assets/workout-exercises.jpg') != '' }}
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          image=Image.open("assets/workout-exercises.jpg").convert("RGB")
+          width,height=image.size
+          output=Path("app/src/main/res/drawable-nodpi")
+          output.mkdir(parents=True,exist_ok=True)
+          for i in range(9):
+              col,row=i%3,i//3
+              left=round(col*width/3)+3
+              top=round(row*height/3)+3
+              right=round((col+1)*width/3)-3
+              bottom=round((row+1)*height/3)-3
+              image.crop((left,top,right,bottom)).save(output/f"exercise_pose_{i}.png",optimize=True)
+              Path(f"app/src/main/res/drawable/exercise_pose_{i}.xml").unlink(missing_ok=True)
+          PY
       - name: Build test APK
         run: gradle :app:assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
