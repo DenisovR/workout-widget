@@ -45,9 +45,14 @@ public class WorkoutWidget extends AppWidgetProvider {
   String date=intent.getStringExtra("date");if(date==null)return;
   SharedPreferences p=c.getSharedPreferences("workout",0);
   int e=intent.getIntExtra("exercise",0);if(e<0||e>2)return;
-  if(ACTION_DONE.equals(a)){p.edit().putBoolean("done_"+date,true).apply();}
-  if(ACTION_TOGGLE.equals(a)){String key="check_"+date+"_"+e;p.edit().putBoolean(key,!p.getBoolean(key,false)).apply();}
-  if(ACTION_WEIGHT.equals(a)){int day=index(LocalDate.parse(date));String key="weight_"+day+"_"+e;float current=p.getFloat(key,0);float value=Math.max(0,current+intent.getIntExtra("delta",0));p.edit().putFloat(key,value).apply();}
+  if(ACTION_DONE.equals(a)){
+   if(!date.equals(nextDate(c).toString())) return;
+   boolean all=true;
+   for(int j=0;j<3;j++) if(!p.getBoolean("check_"+date+"_"+j,false)) all=false;
+   if(all) p.edit().putBoolean("done_"+date,true).apply();
+  }
+  if(ACTION_TOGGLE.equals(a)){if(!date.equals(nextDate(c).toString()))return;String key="check_"+date+"_"+e;p.edit().putBoolean(key,!p.getBoolean(key,false)).apply();}
+  if(ACTION_WEIGHT.equals(a)){if(!date.equals(nextDate(c).toString()))return;int day=index(LocalDate.parse(date));String key="weight_"+day+"_"+e;float current=p.getFloat(key,0);float value=Math.max(0,current+intent.getIntExtra("delta",0));p.edit().putFloat(key,value).apply();}
   refresh(c);
  }
  @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){
@@ -72,7 +77,7 @@ public class WorkoutWidget extends AppWidgetProvider {
     v.setOnClickPendingIntent(plusIds[j],action(c,id,ACTION_WEIGHT,date,j,1));
     v.setOnClickPendingIntent(minusIds[j],action(c,id,ACTION_WEIGHT,date,j,-1));
    }
-   v.setOnClickPendingIntent(R.id.complete,action(c,id,ACTION_DONE,date,0,0));
+   v.setTextViewText(R.id.complete,checked==3?"Завершить →":"Отметь все 3");\n   v.setOnClickPendingIntent(R.id.complete,action(c,id,ACTION_DONE,date,0,0));
    m.updateAppWidget(id,v);
   }
  }
