@@ -7,14 +7,24 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.widget.RemoteViews;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
 
 public class WorkoutWidget extends AppWidgetProvider {
  static final String ACTION_DONE="com.example.workoutwidget.ACTION_DONE";
+ static final String ACTION_TOGGLE="com.example.workoutwidget.ACTION_TOGGLE";
+ static final String ACTION_WEIGHT="com.example.workoutwidget.ACTION_WEIGHT";
  static final String[] titles={"Плечи · Грудь · Ноги","Спина · Руки","Всё тело"};
- static final String[][] moves={{"Махи гантелями · 2 × 12–15","Жим гантелей на полу · 2 × 8–12","Приседания с гантелью · 2 × 10–12"},{"Тяга гантели · 2 × 10–12","Молотковые сгибания · 2 × 10–12","Разгибание из-за головы · 2 × 10–12"},{"Тяга штанги в наклоне · 2 × 10–12","Махи гантелями · 2 × 12–15","Румынская тяга · 2 × 10–12"}};
+ static final String[][] names={{"Махи гантелями","Жим гантелей на полу","Приседания с гантелью"},{"Тяга гантели в наклоне","Молотковые сгибания","Разгибание из-за головы"},{"Тяга штанги в наклоне","Махи гантелями","Румынская тяга"}};
+ static final String[][] reps={{"2 × 12–15","2 × 8–12","2 × 10–12"},{"2 × 10–12","2 × 10–12","2 × 10–12"},{"2 × 10–12","2 × 12–15","2 × 10–12"}};
+ static final int[] nameIds={R.id.name1,R.id.name2,R.id.name3};
+ static final int[] repIds={R.id.reps1,R.id.reps2,R.id.reps3};
+ static final int[] weightIds={R.id.weight1,R.id.weight2,R.id.weight3};
+ static final int[] checkIds={R.id.check1,R.id.check2,R.id.check3};
+ static final int[] plusIds={R.id.plus1,R.id.plus2,R.id.plus3};
+ static final int[] minusIds={R.id.minus1,R.id.minus2,R.id.minus3};
  static LocalDate nextDate(Context c){
   SharedPreferences p=c.getSharedPreferences("workout",0);
   LocalDate today=LocalDate.now();
@@ -23,6 +33,47 @@ public class WorkoutWidget extends AppWidgetProvider {
  }
  static int index(LocalDate d){return d.getDayOfWeek()==DayOfWeek.MONDAY?0:d.getDayOfWeek()==DayOfWeek.WEDNESDAY?1:2;}
  static void refresh(Context c){AppWidgetManager m=AppWidgetManager.getInstance(c); int[] ids=m.getAppWidgetIds(new ComponentName(c,WorkoutWidget.class)); if(ids.length>0) new WorkoutWidget().onUpdate(c,m,ids);}
- @Override public void onReceive(Context c,Intent intent){super.onReceive(c,intent); if(ACTION_DONE.equals(intent.getAction())) {String date=intent.getStringExtra("date"); if(date!=null) c.getSharedPreferences("workout",0).edit().putBoolean("done_"+date,true).apply(); refresh(c);}}
- @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){LocalDate d=nextDate(c);int idx=index(d);for(int id:ids){RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.widget);v.setTextViewText(R.id.day,"БЛИЖАЙШАЯ · "+d.toString());v.setTextViewText(R.id.title,titles[idx]);v.setTextViewText(R.id.e1,"01  "+moves[idx][0]);v.setTextViewText(R.id.e2,"02  "+moves[idx][1]);v.setTextViewText(R.id.e3,"03  "+moves[idx][2]);v.setTextViewText(R.id.progress,"3 упражнения · 2 подхода");Intent intent=new Intent(c,WorkoutWidget.class).setAction(ACTION_DONE).putExtra("date",d.toString());PendingIntent pi=PendingIntent.getBroadcast(c,id,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);v.setOnClickPendingIntent(R.id.complete,pi);m.updateAppWidget(id,v);}}
+ static PendingIntent action(Context c,int widgetId,String action,String date,int exercise,int delta){
+  Intent i=new Intent(c,WorkoutWidget.class).setAction(action).putExtra("date",date).putExtra("exercise",exercise).putExtra("delta",delta);
+  int code=widgetId*100+exercise*10+(ACTION_TOGGLE.equals(action)?1:ACTION_DONE.equals(action)?2:delta>0?3:4);
+  return PendingIntent.getBroadcast(c,code,i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+ }
+ @Override public void onReceive(Context c,Intent intent){
+  super.onReceive(c,intent);
+  String a=intent.getAction();
+  if(!ACTION_DONE.equals(a)&&!ACTION_TOGGLE.equals(a)&&!ACTION_WEIGHT.equals(a))return;
+  String date=intent.getStringExtra("date");if(date==null)return;
+  SharedPreferences p=c.getSharedPreferences("workout",0);
+  int e=intent.getIntExtra("exercise",0);if(e<0||e>2)return;
+  if(ACTION_DONE.equals(a)){p.edit().putBoolean("done_"+date,true).apply();}
+  if(ACTION_TOGGLE.equals(a)){String key="check_"+date+"_"+e;p.edit().putBoolean(key,!p.getBoolean(key,false)).apply();}
+  if(ACTION_WEIGHT.equals(a)){int day=index(LocalDate.parse(date));String key="weight_"+day+"_"+e;float current=p.getFloat(key,0);float value=Math.max(0,current+intent.getIntExtra("delta",0));p.edit().putFloat(key,value).apply();}
+  refresh(c);
+ }
+ @Override public void onUpdate(Context c,AppWidgetManager m,int[] ids){
+  LocalDate d=nextDate(c);String date=d.toString();int idx=index(d);SharedPreferences p=c.getSharedPreferences("workout",0);
+  int checked=0;for(int j=0;j<3;j++)if(p.getBoolean("check_"+date+"_"+j,false))checked++;
+  for(int id:ids){
+   RemoteViews v=new RemoteViews(c.getPackageName(),R.layout.widget);
+   v.setTextViewText(R.id.day,"БЛИЖАЙШАЯ · "+date);
+   v.setTextViewText(R.id.title,titles[idx]);
+   v.setTextViewText(R.id.count,checked+"/3");
+   v.setTextViewText(R.id.subtitle,"3 упражнения · 2 подхода · отдых 60–90 сек");
+   v.setTextViewText(R.id.progress,"Выполнено "+checked+" из 3");
+   for(int j=0;j<3;j++){
+    v.setTextViewText(nameIds[j],names[idx][j]);
+    v.setTextViewText(repIds[j],reps[idx][j]);
+    float weight=p.getFloat("weight_"+idx+"_"+j,0);
+    v.setTextViewText(weightIds[j],((weight==(int)weight)?Integer.toString((int)weight):Float.toString(weight))+" кг");
+    boolean done=p.getBoolean("check_"+date+"_"+j,false);
+    v.setTextViewText(checkIds[j],done?"✓":"○");
+    v.setTextColor(checkIds[j],done?Color.rgb(142,229,174):Color.rgb(127,157,145));
+    v.setOnClickPendingIntent(checkIds[j],action(c,id,ACTION_TOGGLE,date,j,0));
+    v.setOnClickPendingIntent(plusIds[j],action(c,id,ACTION_WEIGHT,date,j,1));
+    v.setOnClickPendingIntent(minusIds[j],action(c,id,ACTION_WEIGHT,date,j,-1));
+   }
+   v.setOnClickPendingIntent(R.id.complete,action(c,id,ACTION_DONE,date,0,0));
+   m.updateAppWidget(id,v);
+  }
+ }
 }
