@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
       }
     };
     IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-    if(Build.VERSION.SDK_INT >= 33) registerReceiver(downloadReceiver,filter,Context.RECEIVER_NOT_EXPORTED); else registerReceiver(downloadReceiver,filter);
+    if(Build.VERSION.SDK_INT >= 33) registerReceiver(downloadReceiver,filter,Context.RECEIVER_EXPORTED); else registerReceiver(downloadReceiver,filter);
   }
   @Override protected void onDestroy(){if(downloadReceiver != null)unregisterReceiver(downloadReceiver);super.onDestroy();}
   private void downloadUpdate(String link) {
