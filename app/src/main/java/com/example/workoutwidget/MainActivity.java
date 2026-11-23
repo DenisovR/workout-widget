@@ -5,6 +5,14 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.content.Intent;
 import android.net.Uri;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.os.Environment;
+import android.os.Build;
+import androidx.core.content.FileProvider;
+import java.io.File;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.Button;
@@ -20,6 +28,8 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
   private Button update;
+  private long pendingDownload = -1;
+  private BroadcastReceiver downloadReceiver;
   private static final String RELEASE_API = "https://api.github.com/repos/DenisovR/workout-widget/releases/latest";
   @Override public void onCreate(Bundle state) {
     super.onCreate(state);
@@ -45,6 +55,38 @@ public class MainActivity extends Activity {
     version.setGravity(Gravity.CENTER_HORIZONTAL);
     root.addView(version);
     setContentView(root);
+    downloadReceiver = new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+        if(id != pendingDownload) return;
+        DownloadManager dm = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+        android.database.Cursor cursor = dm.query(new DownloadManager.Query().setFilterById(id));
+        boolean success = false;
+        if(cursor != null) {try {if(cursor.moveToFirst()) success = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL;} finally {cursor.close();}}
+        if(!success) {new AlertDialog.Builder(MainActivity.this).setMessage("Не удалось скачать обновление.").setPositiveButton("ОК",null).show();return;}
+        File file = new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"workout-update.apk");
+        Uri uri = FileProvider.getUriForFile(MainActivity.this,getPackageName()+".fileprovider",file);
+        Intent install = new Intent(Intent.ACTION_VIEW).setDataAndType(uri,"application/vnd.android.package-archive");
+        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {startActivity(install);}catch(Exception e){new AlertDialog.Builder(MainActivity.this).setMessage("Не удалось открыть установщик: "+e.getMessage()).setPositiveButton("ОК",null).show();}
+      }
+    };
+    IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+    if(Build.VERSION.SDK_INT >= 33) registerReceiver(downloadReceiver,filter,Context.RECEIVER_NOT_EXPORTED); else registerReceiver(downloadReceiver,filter);
+  }
+  @Override protected void onDestroy(){if(downloadReceiver != null)unregisterReceiver(downloadReceiver);super.onDestroy();}
+  }
+  private void downloadUpdate(String link) {
+    try {
+      File folder = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+      if(folder == null) throw new IllegalStateException("Нет доступной папки загрузок");
+      DownloadManager.Request request = new DownloadManager.Request(Uri.parse(link));
+      request.setTitle("Обновление «Мои тренировки»");
+      request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+      request.setDestinationUri(Uri.fromFile(new File(folder,"workout-update.apk")));
+      File old = new File(folder,"workout-update.apk"); if(old.exists()) old.delete();
+      pendingDownload = ((DownloadManager)getSystemService(DOWNLOAD_SERVICE)).enqueue(request);
+    } catch(Exception e) {new AlertDialog.Builder(this).setMessage("Ошибка загрузки: "+e.getMessage()).setPositiveButton("ОК",null).show();}
   }
   private void checkUpdates() {
     update.setEnabled(false); update.setText("Проверяем GitHub…");
@@ -78,7 +120,7 @@ public class MainActivity extends Activity {
       runOnUiThread(() -> {
         update.setEnabled(true);update.setText("Проверить обновления");
         AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Обновления").setMessage(text).setNegativeButton("Закрыть",null);
-        if(available) dialog.setPositiveButton("Скачать", (d,w) -> startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(link))));
+        if(available) dialog.setPositiveButton("Обновить", (d,w) -> downloadUpdate(link));
         dialog.show();
       });
     }).start();
