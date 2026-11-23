@@ -2,15 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
  android:layout_width="match_parent" android:layout_height="wrap_content"
  android:layout_marginBottom="7dp" android:background="@drawable/exercise_card" android:padding="12dp" android:gravity="center_vertical" android:orientation="horizontal">
- <TextView android:id="@+id/icon1" android:layout_width="42dp" android:layout_height="42dp" android:background="@drawable/icon_back" android:gravity="center" android:textSize="24sp" android:text="🏋"/>
- <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="9dp" android:orientation="vertical">
+ <ImageView android:id="@+id/icon1" android:layout_width="112dp" android:layout_height="86dp" android:scaleType="fitCenter" android:contentDescription="Схема выполнения упражнения" android:src="@drawable/exercise_pose_0"/>
+ <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginLeft="8dp" android:orientation="vertical">
   <TextView android:id="@+id/name1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" android:maxLines="2" android:ellipsize="end"/>
-  <TextView android:id="@+id/reps1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="#9EB4AC" android:textSize="11sp"/>
+  <TextView android:id="@+id/reps1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="#A9A9AC" android:textSize="11sp"/>
   <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="6dp">
-   <TextView android:id="@+id/minus1" android:layout_width="26dp" android:layout_height="26dp" android:gravity="center" android:background="@drawable/small_button" android:text="−" android:textColor="#D6F8DF" android:textSize="18sp"/>
-   <TextView android:id="@+id/weight1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="62dp" android:gravity="center" android:textColor="#D6F8DF" android:textSize="12sp" android:textStyle="bold"/>
-   <TextView android:id="@+id/plus1" android:layout_width="26dp" android:layout_height="26dp" android:gravity="center" android:background="@drawable/small_button" android:text="+" android:textColor="#D6F8DF" android:textSize="18sp"/>
+   <TextView android:id="@+id/minus1" android:layout_width="26dp" android:layout_height="26dp" android:gravity="center" android:background="@drawable/small_button" android:text="−" android:textColor="#F4F4F4" android:textSize="18sp"/>
+   <TextView android:id="@+id/weight1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="62dp" android:gravity="center" android:textColor="#F4F4F4" android:textSize="12sp" android:textStyle="bold"/>
+   <TextView android:id="@+id/plus1" android:layout_width="26dp" android:layout_height="26dp" android:gravity="center" android:background="@drawable/small_button" android:text="+" android:textColor="#F4F4F4" android:textSize="18sp"/>
   </LinearLayout>
  </LinearLayout>
- <TextView android:id="@+id/check1" android:layout_width="86dp" android:layout_height="48dp" android:gravity="center" android:text="Отметить" android:textColor="#A8DDBA" android:textSize="12sp" android:textStyle="bold" android:contentDescription="Отметить выполнение упражнения"/>
+ <TextView android:id="@+id/check1" android:layout_width="86dp" android:layout_height="48dp" android:gravity="center" android:text="Отметить" android:textColor="#E4E4E4" android:textSize="12sp" android:textStyle="bold" android:contentDescription="Отметить выполнение упражнения"/>
 </LinearLayout>
