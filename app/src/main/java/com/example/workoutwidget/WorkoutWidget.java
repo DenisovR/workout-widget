@@ -21,6 +21,7 @@ public class WorkoutWidget extends AppWidgetProvider {
  static final String[][] names={{"Махи гантелями","Жим гантелей на полу","Приседания с гантелью"},{"Тяга гантели в наклоне","Молотковые сгибания","Разгибание из-за головы"},{"Тяга штанги в наклоне","Махи гантелями","Румынская тяга"}};
  static final String[][] reps={{"2 × 12–15","2 × 8–12","2 × 10–12"},{"2 × 10–12","2 × 10–12","2 × 10–12"},{"2 × 10–12","2 × 12–15","2 × 10–12"}};
  static final String[][] symbols={{"↗","▰","▾"},{"↙","💪","↑"},{"↙","↗","▾"}};
+ static final int[][] poseIds={{R.drawable.exercise_pose_0,R.drawable.exercise_pose_1,R.drawable.exercise_pose_2},{R.drawable.exercise_pose_3,R.drawable.exercise_pose_4,R.drawable.exercise_pose_5},{R.drawable.exercise_pose_6,R.drawable.exercise_pose_7,R.drawable.exercise_pose_8}};
  static final int[] iconIds={R.id.icon1,R.id.icon2,R.id.icon3};
  static final String[][] exerciseKeys={{"lateral_raise","floor_press","goblet_squat"},{"one_arm_row","hammer_curl","overhead_extension"},{"barbell_row","lateral_raise","romanian_deadlift"}};
  static final int[] nameIds={R.id.name1,R.id.name2,R.id.name3};
@@ -76,13 +77,13 @@ public class WorkoutWidget extends AppWidgetProvider {
    v.setTextViewText(R.id.progress,"Выполнено "+checked+" из 3");
    for(int j=0;j<3;j++){
     v.setTextViewText(nameIds[j],names[idx][j]);
-    v.setTextViewText(iconIds[j],symbols[idx][j]);
+    v.setImageViewResource(iconIds[j],poseIds[idx][j]);
     v.setTextViewText(repIds[j],sets+" × "+reps[idx][j].substring(reps[idx][j].indexOf("×")+1).trim());
     float weight=p.getFloat("weight_ex_"+exerciseKeys[idx][j],p.getFloat("weight_"+idx+"_"+j,0));
     v.setTextViewText(weightIds[j],((weight==(int)weight)?Integer.toString((int)weight):Float.toString(weight))+" кг");
     boolean done=p.getBoolean("check_"+date+"_"+j,false);
     v.setTextViewText(checkIds[j],done?"✓ Готово":"○ Отметить");
-    v.setTextColor(checkIds[j],done?Color.rgb(142,229,174):Color.rgb(127,157,145));
+    v.setTextColor(checkIds[j],done?Color.WHITE:Color.rgb(175,175,175));
     v.setOnClickPendingIntent(checkIds[j],action(c,id,ACTION_TOGGLE,date,j,0));
     v.setOnClickPendingIntent(plusIds[j],action(c,id,ACTION_WEIGHT,date,j,1));
     v.setOnClickPendingIntent(minusIds[j],action(c,id,ACTION_WEIGHT,date,j,-1));
